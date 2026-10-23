@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}{{ SITE_NAME }} — Discover places. Share your experience.{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
+  <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
+
+  <div class="container hero-inner">
+    <span class="eyebrow">
+      <span class="eyebrow-dot" aria-hidden="true"></span>
+      Real reviews from real visitors
+    </span>
+
+    <h1 class="hero-title">
+      Discover Places.<br>
+      <span class="text-gradient">Share Your Experience.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Find restaurants, cafes, hotels and attractions near you. Read what other
+      people honestly thought — then add your own review to help the next visitor.
+    </p>
+
+    <form class="search-card" action="/places" method="get" role="search">
+      <div class="search-field">
+        <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+        </svg>
+        <label class="sr-only" for="home-q">Search by place name, location or category</label>
+        <input id="home-q" type="search" name="q" placeholder="Search places or categories…"
+               value="{{ query }}" autocomplete="off">
+      </div>
+      <div class="search-divider" aria-hidden="true"></div>
+      <div class="search-select">
+        <label class="sr-only" for="home-country">Country</label>
+        <select id="home-country" name="country">
+          <option value="">All countries</option>
+          {% for country in countries %}
+            <option value="{{ country }}">{{ country }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="search-select">
+        <label class="sr-only" for="home-category">Category</label>
+        <select id="home-category" name="category">
+          <option value="">All categories</option>
+          {% for category in CATEGORIES %}
+            <option value="{{ category }}">{{ CATEGORY_ICONS.get(category, '📍') }} {{ category }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-primary search-submit" type="submit">Search</button>
+    </form>
+
+    <div class="hero-cats">
+      <span class="hero-cats-label">Popular:</span>
+      {% for category in ['Restaurant', 'Cafe', 'Hotel', 'Attraction', 'Park'] %}
+        <a class="chip" href="/places?category={{ category }}">
+          <span aria-hidden="true">{{ CATEGORY_ICONS.get(category, '📍') }}</span> {{ category }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <dl class="hero-stats">
+      <div>
+        <dt>Places to explore</dt>
+        <dd>{{ stats.places }}</dd>
+      </div>
+      <div>
+        <dt>Reviews shared</dt>
+        <dd>{{ stats.reviews }}</dd>
+      </div>
+      <div>
+        <dt>Average rating</dt>
+        <dd>{% if stats.avg_rating %}{{ '%.1f'|format(stats.avg_rating) }}<span class="stat-unit">/5</span>{% else %}—{% endif %}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow eyebrow-muted">Top rated</span>
+        <h2>Popular and highly rated places</h2>
+        <p class="section-lead">The places visitors keep coming back to — ranked by their average rating.</p>
+      </div>
+      <a class="btn btn-outline" href="/places">View all places</a>
+    </div>
+
+    {% if popular %}
+      <div class="card-grid">
+        {% for place in popular %}
+          {% include "partials/place_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">📍</span>
+        <h3>No places yet</h3>
+        <p>Places will appear here as soon as they are added.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section section-tinted">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow eyebrow-muted">Fresh opinions</span>
+        <h2>Recently submitted reviews</h2>
+        <p class="section-lead">The newest experiences shared by the Rate My Review community.</p>
+      </div>
+      <a class="btn btn-outline" href="/places">Explore places</a>
+    </div>
+
+    {% if recent_reviews %}
+      <div class="review-grid">
+        {% for review in recent_reviews %}
+          <article class="review-card">
+            <div class="review-card-top">
+              {{ stars(review.rating) }}
+              <span class="review-card-date">{{ review.created_at|datefmt }}</span>
+            </div>
+            <p class="review-card-text">{{ review.comment }}</p>
+            <div class="review-card-foot">
+              <span class="avatar avatar-sm" aria-hidden="true">{{ review.author_name[0]|upper }}</span>
+              <div>
+                <span class="review-card-author">{{ review.author_name|short_name }}</span>
+                <a class="review-card-place" href="/places/{{ review.place_id }}#reviews">
+                  {{ CATEGORY_ICONS.get(review.place_category, '📍') }} {{ review.place_name }}
+                </a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">💬</span>
+        <h3>No reviews yet</h3>
+        <p>Be the first to share your experience.</p>
+        <a class="btn btn-primary" href="/write-review">Write a review</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head section-head-center">
+      <div>
+        <span class="eyebrow eyebrow-muted">How it works</span>
+        <h2>From search to shared experience in three steps</h2>
+        <p class="section-lead">No long forms, no noise — just useful opinions from people who have been there.</p>
+      </div>
+    </div>
+
+    <div class="steps">
+      <article class="step-card">
+        <span class="step-number">1</span>
+        <span class="step-icon" aria-hidden="true">🔍</span>
+        <h3>Find a place</h3>
+        <p>Search by name, or narrow by country, state and category to see matching places with their average rating.</p>
+      </article>
+      <article class="step-card">
+        <span class="step-number">2</span>
+        <span class="step-icon" aria-hidden="true">⭐</span>
+        <h3>Read the reviews</h3>
+        <p>Open a place to read every comment, see the rating breakdown and learn what to expect before you go.</p>
+      </article>
+      <article class="step-card">
+        <span class="step-number">3</span>
+        <span class="step-icon" aria-hidden="true">✍️</span>
+        <h3>Share your experience</h3>
+        <p>Create a free account, give a 1–5 star rating and tell the community what you thought.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Been somewhere worth talking about?</h2>
+        <p>Your review helps someone else choose a better place to spend their time.</p>
+      </div>
+      {% if user %}
+        <a class="btn btn-light" href="/write-review">Write a review</a>
+      {% else %}
+        <a class="btn btn-light" href="/register">Create a free account</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

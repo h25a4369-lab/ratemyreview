@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}{% if mode == 'edit' %}Edit your review{% else %}Write a review{% endif %} — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span>
+      {% if mode == 'edit' and review %}
+        <a href="/places/{{ review.place_id }}">{{ review.place_name }}</a><span aria-hidden="true">/</span>
+        <span>Edit review</span>
+      {% else %}
+        <span>Write a Review</span>
+      {% endif %}
+    </nav>
+    <h1>{% if mode == 'edit' %}Edit your review{% else %}Write a review{% endif %}</h1>
+    <p class="page-lead">
+      {% if mode == 'edit' %}
+        Update your rating or comment. Your average is recalculated straight away.
+      {% else %}
+        Pick the place you visited, give it a star rating and tell people what it was like.
+      {% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container form-layout">
+    <form class="card form-card" method="post"
+          action="{% if mode == 'edit' %}/reviews/{{ review.id }}/edit{% else %}/reviews{% endif %}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      {% if mode == 'edit' and review %}
+        <div class="selected-place">
+          <span class="cat-icon" aria-hidden="true">{{ CATEGORY_ICONS.get(review.place_category, '📍') }}</span>
+          <div>
+            <span class="selected-place-label">Reviewing</span>
+            <strong>{{ review.place_name }}</strong>
+            <span class="muted small">{{ review.place_location }}</span>
+            {% if review.place_state or review.place_country %}
+              <span class="muted small">
+                {{ review.place_state }}{% if review.place_state and review.place_country %}, {% endif %}{{ review.place_country }}
+              </span>
+            {% endif %}
+          </div>
+          <a class="link-btn" href="/places/{{ review.place_id }}">View place</a>
+        </div>
+      {% else %}
+        <div class="geo-fields">
+          <div class="form-group">
+            <label class="label" for="review-country">Country</label>
+            <select id="review-country" data-geo-country>
+              <option value="">Choose a country…</option>
+              {% for country in countries %}
+                <option value="{{ country }}">{{ country }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label" for="review-state">State / region</label>
+            <select id="review-state" data-geo-state>
+              <option value="">Choose a state…</option>
+              {% for country in countries %}
+                {% for state in places|selectattr('country', 'equalto', country)|map(attribute='state')|unique|list %}
+                  <option value="{{ state }}" data-country="{{ country }}">{{ state }}</option>
+                {% endfor %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="place_id">Place</label>
+          <select id="place_id" name="place_id" required data-geo-place
+                  {% if errors.place %}aria-invalid="true" aria-describedby="place-error"{% endif %}>
+            <option value="">Choose a place…</option>
+            {% for place in places %}
+              <option value="{{ place.id }}"
+                      data-country="{{ place.country }}" data-state="{{ place.state }}"
+                      {% if selected_place_id|string == place.id|string %}selected{% endif %}>
+                {{ place.name }} — {{ place.state }}, {{ place.country }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if errors.place %}<p class="field-error" id="place-error">{{ errors.place }}</p>{% endif %}
+          <p class="hint">
+            Country and state narrow the list. Your review is saved against the place, which
+            carries its own country and state.
+            Cannot see the place? <a href="/contact">Tell us about it</a> and an administrator can add it.
+          </p>
+        </div>
+      {% endif %}
+
+      <fieldset class="rating-field">
+        <legend class="label">Your rating</legend>
+        <div class="star-picker">
+          {% for value in [5, 4, 3, 2, 1] %}
+            <input type="radio" id="star-{{ value }}" name="rating" value="{{ value }}"
+                   {% if form.rating|string == value|string %}checked{% endif %} required>
+            <label for="star-{{ value }}" title="{{ value }} star{{ '' if value == 1 else 's' }}">
+              <span class="sr-only">{{ value }} star{{ '' if value == 1 else 's' }}</span>
+              <span aria-hidden="true">★</span>
+            </label>
+          {% endfor %}
+        </div>
+        <p class="rating-hint" id="ratingHint" aria-live="polite">Choose a rating from 1 (poor) to 5 (excellent).</p>
+        {% if errors.rating %}<p class="field-error">{{ errors.rating }}</p>{% endif %}
+      </fieldset>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label class="label" for="comment">Your review</label>
+          <span class="char-count"><span id="charCount">0</span>/1000</span>
+        </div>
+        <textarea id="comment" name="comment" rows="6" maxlength="1000" required
+                  placeholder="What did you like? What could be better? Was it good value?"
+                  {% if errors.comment %}aria-invalid="true" aria-describedby="comment-error"{% endif %}>{{ form.comment or '' }}</textarea>
+        {% if errors.comment %}<p class="field-error" id="comment-error">{{ errors.comment }}</p>{% endif %}
+        <p class="hint">Please describe your own visit. Reviews that contain advertising or personal details may be removed.</p>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">
+          {% if mode == 'edit' %}Save changes{% else %}Submit review{% endif %}
+        </button>
+        <a class="btn btn-ghost"
+           href="{% if mode == 'edit' and review %}/places/{{ review.place_id }}{% else %}/places{% endif %}">Cancel</a>
+      </div>
+    </form>
+
+    <aside class="form-aside">
+      <div class="card tip-card">
+        <h2 class="card-title">What makes a useful review?</h2>
+        <ul class="tick-list">
+          <li>Mention what you ate, saw or experienced.</li>
+          <li>Say who the place suits — families, solo visits, groups.</li>
+          <li>Be honest about the parts that disappointed you.</li>
+          <li>Keep it to a few sentences; detail beats length.</li>
+        </ul>
+      </div>
+      <div class="card tip-card">
+        <h2 class="card-title">Your review, your control</h2>
+        <p class="muted small">
+          You can edit or delete your review at any time from the place page or
+          your <a href="/my-reviews">My Reviews</a> page. We never edit your words for you.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

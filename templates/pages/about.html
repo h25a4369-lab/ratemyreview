@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}About us — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span><span>About Us</span>
+    </nav>
+    <h1>About {{ SITE_NAME }}</h1>
+    <p class="page-lead">A simple idea: the best guide to a place is someone who has actually been there.</p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container prose-layout">
+    <div class="card prose-card">
+      <h2>Why we built this</h2>
+      <p>
+        Choosing where to eat, stay or spend an afternoon usually means guessing. Reviews are
+        scattered across social media, maps and messaging groups, and it is hard to tell which
+        ones are useful. Rate My Review brings those opinions into one calm, readable place.
+      </p>
+      <p>
+        Anyone can browse places and read reviews without an account. If you want to add your
+        own experience, you create a free account, pick the place, choose a rating from one to
+        five stars and write a few honest sentences.
+      </p>
+
+      <h2>What you can do here</h2>
+      <ul class="tick-list">
+        <li>Search places by name, location or category.</li>
+        <li>See an average rating calculated from every saved review.</li>
+        <li>Read reviews sorted by newest, highest or lowest rating.</li>
+        <li>Write, edit and delete your own reviews.</li>
+        <li>Report content that looks like spam or abuse for a human to check.</li>
+      </ul>
+
+      <h2>How ratings work</h2>
+      <p>
+        Every review carries a whole-star rating from 1 to 5. The average shown on a place is
+        simply the sum of the saved ratings divided by the number of reviews, rounded to one
+        decimal place. One person can leave one review per place; you can edit it later instead
+        of posting again, so a single visit cannot be counted twice.
+      </p>
+
+      <h2>About this build</h2>
+      <p>
+        Rate My Review is a university project demonstration. It runs on a Python FastAPI
+        backend with a SQLite database and server-rendered HTML, CSS and JavaScript. The places
+        and reviews you see on first launch are clearly labelled sample data so the site is not
+        empty, and administrators can add, edit or remove places at any time.
+      </p>
+    </div>
+
+    <aside class="prose-aside">
+      <div class="card tip-card">
+        <h2 class="card-title">At a glance</h2>
+        <dl class="meta-list meta-list-stack">
+          <div><dt>Roles</dt><dd>Visitor, registered user, administrator</dd></div>
+          <div><dt>Reviews per place</dt><dd>One per account, editable</dd></div>
+          <div><dt>Rating scale</dt><dd>1 to 5 whole stars</dd></div>
+          <div><dt>Moderation</dt><dd>Reports reviewed by a person</dd></div>
+        </dl>
+      </div>
+      <div class="card tip-card">
+        <h2 class="card-title">Get in touch</h2>
+        <p class="muted small">Questions, bugs or ideas are welcome.</p>
+        <a class="btn btn-outline btn-block" href="/contact">Contact us</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Manage users — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-admin">
+  <div class="container">
+    <span class="eyebrow eyebrow-muted">Administrator area</span>
+    <h1>Users</h1>
+    <p class="page-lead">Promote trusted people to administrators, or remove accounts that break the rules.</p>
+    {% include "admin/_nav.html" %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="toolbar">
+      <p class="muted small">{{ users|length }} account{{ '' if users|length == 1 else 's' }} · {{ admin_count }} administrator{{ '' if admin_count == 1 else 's' }}</p>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Reviews</th>
+            <th scope="col">Joined</th>
+            <th scope="col" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for person in users %}
+            <tr>
+              <td>
+                <span class="table-title">{{ person.name }}</span>
+                {% if person.id == user.id %}<span class="badge badge-you">You</span>{% endif %}
+              </td>
+              <td class="muted">{{ person.email }}</td>
+              <td>
+                <span class="badge {{ 'badge-admin' if person.role == 'admin' else 'badge-soft' }}">
+                  {{ 'Administrator' if person.role == 'admin' else 'Registered user' }}
+                </span>
+              </td>
+              <td>{{ person.review_count }}</td>
+              <td class="muted small">{{ person.created_at|datefmt }}</td>
+              <td class="actions-col">
+                <div class="table-actions">
+                  {% if person.role == 'user' %}
+                    <form method="post" action="/admin/users/{{ person.id }}/role" class="inline"
+                          data-confirm="Make {{ person.name }} an administrator?">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <input type="hidden" name="role" value="admin">
+                      <button class="btn btn-outline btn-sm" type="submit">Make admin</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="/admin/users/{{ person.id }}/role" class="inline"
+                          data-confirm="Remove the administrator role from {{ person.name }}?">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <input type="hidden" name="role" value="user">
+                      <button class="btn btn-outline btn-sm" type="submit"
+                              {% if person.id == user.id %}disabled title="You cannot demote yourself"{% endif %}>
+                        Remove admin
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  <form method="post" action="/admin/users/{{ person.id }}/delete" class="inline"
+                        data-confirm="Delete {{ person.name }} and all of their reviews? This cannot be undone.">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="btn btn-danger-ghost btn-sm" type="submit"
+                            {% if person.id == user.id %}disabled title="You cannot delete your own account here"{% endif %}>
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="hint">
+      There must always be at least one administrator. Deleting a user also deletes their reviews
+      and reports, which may change place averages.
+    </p>
+  </div>
+</section>
+{% endblock %}

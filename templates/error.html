@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="error-card">
+      <span class="error-code">{{ code }}</span>
+      <h1>{{ title }}</h1>
+      <p>{{ message }}</p>
+      <div class="empty-actions">
+        <a class="btn btn-primary" href="/">Back to home</a>
+        <a class="btn btn-outline" href="/places">Explore places</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

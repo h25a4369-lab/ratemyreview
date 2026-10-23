@@ -1,0 +1,10 @@
+{# Star rating display: the gold layer is clipped to the rating value. #}
+{% macro stars(rating, extra_class='') -%}
+  <span class="stars {{ extra_class }}"
+        style="--rating: {{ (rating or 0)|float }}"
+        role="img"
+        aria-label="{% if rating %}{{ '%.1f'|format(rating|float) }} out of 5 stars{% else %}No rating yet{% endif %}">
+    <span class="stars-track" aria-hidden="true">★★★★★</span>
+    <span class="stars-fill" aria-hidden="true">★★★★★</span>
+  </span>
+{%- endmacro %}

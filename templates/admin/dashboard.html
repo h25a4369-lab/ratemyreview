@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}Administration — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-admin">
+  <div class="container">
+    <span class="eyebrow eyebrow-muted">Administrator area</span>
+    <h1>Overview</h1>
+    <p class="page-lead">Manage places, users and reported reviews. Reports never remove a review automatically.</p>
+    {% include "admin/_nav.html" %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="stat-grid">
+      <a class="stat-card" href="/admin/places">
+        <span class="stat-label">Places</span>
+        <span class="stat-value">{{ stats.places }}</span>
+        <span class="stat-foot">Add, edit or remove</span>
+      </a>
+      <a class="stat-card" href="/admin/reviews">
+        <span class="stat-label">Reviews</span>
+        <span class="stat-value">{{ stats.reviews }}</span>
+        <span class="stat-foot">Moderate comments</span>
+      </a>
+      <a class="stat-card" href="/admin/users">
+        <span class="stat-label">Registered users</span>
+        <span class="stat-value">{{ stats.users }}</span>
+        <span class="stat-foot">Roles and accounts</span>
+      </a>
+      <a class="stat-card stat-card-alert" href="/admin/reports">
+        <span class="stat-label">Open reports</span>
+        <span class="stat-value">{{ open_reports }}</span>
+        <span class="stat-foot">Waiting for a decision</span>
+      </a>
+    </div>
+
+    <div class="admin-grid">
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Latest reports</h2>
+            <p class="card-sub">Newest first, with open reports at the top.</p>
+          </div>
+          <a class="link-btn" href="/admin/reports">View all</a>
+        </div>
+
+        {% if reports %}
+          <div class="stack-sm">
+            {% for report in reports %}
+              <article class="report-row">
+                <div class="report-row-main">
+                  <div class="report-row-top">
+                    <span class="badge badge-{{ 'warn' if report.status == 'open' else 'soft' }}">
+                      {{ report.status|capitalize }}
+                    </span>
+                    <span class="muted small">{{ report.created_at|datefmt }}</span>
+                  </div>
+                  <p class="report-reason">{{ report.reason }}</p>
+                  <p class="muted small">
+                    Review by {{ report.author_name|short_name }} ·
+                    <a href="/places/{{ report.place_id }}#review-{{ report.review_id }}">{{ report.place_name }}</a>
+                  </p>
+                </div>
+                <a class="btn btn-outline btn-sm" href="/admin/reports">Review</a>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">No reports have been submitted yet.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">Highest rated places</h2>
+            <p class="card-sub">Based on live averages.</p>
+          </div>
+          <a class="link-btn" href="/admin/places">Manage</a>
+        </div>
+        <ol class="rank-list">
+          {% for place in top_places %}
+            <li>
+              <span class="rank-number">{{ loop.index }}</span>
+              <div class="rank-body">
+                <a href="/places/{{ place.id }}">{{ place.name }}</a>
+                <span class="muted small">{{ place.review_count }} review{{ '' if place.review_count == 1 else 's' }}</span>
+              </div>
+              {% if place.review_count %}
+                <span class="rank-score">{{ '%.1f'|format(place.avg_rating) }}</span>
+              {% else %}
+                <span class="muted small">—</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ol>
+        <div class="quick-actions">
+          <a class="btn btn-primary btn-sm" href="/admin/places/new">Add a place</a>
+          <a class="btn btn-outline btn-sm" href="/places">View public site</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+{% endblock %}

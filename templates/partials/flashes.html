@@ -1,0 +1,13 @@
+{% if flashes %}
+  <div class="container flash-stack" aria-live="polite">
+    {% for item in flashes %}
+      <div class="flash flash-{{ item.kind }}" role="status">
+        <span class="flash-icon" aria-hidden="true">
+          {% if item.kind == 'error' %}!{% elif item.kind == 'info' %}i{% else %}✓{% endif %}
+        </span>
+        <span class="flash-text">{{ item.message }}</span>
+        <button type="button" class="flash-close" aria-label="Dismiss message">&times;</button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

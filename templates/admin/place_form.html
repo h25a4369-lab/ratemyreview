@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{% if mode == 'edit' %}Edit place{% else %}Add place{% endif %} — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-admin">
+  <div class="container">
+    <span class="eyebrow eyebrow-muted">Administrator area</span>
+    <h1>{% if mode == 'edit' %}Edit place{% else %}Add a place{% endif %}</h1>
+    <p class="page-lead">Places appear on the public site immediately after saving.</p>
+    {% include "admin/_nav.html" %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container form-layout">
+    <form class="card form-card" method="post"
+          action="{% if mode == 'edit' %}/admin/places/{{ place.id }}/edit{% else %}/admin/places/new{% endif %}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <div class="form-group">
+        <label class="label" for="name">Place name</label>
+        <input id="name" name="name" type="text" value="{{ place.name or '' }}" required maxlength="100"
+               {% if errors.name %}aria-invalid="true" aria-describedby="name-error"{% endif %}>
+        {% if errors.name %}<p class="field-error" id="name-error">{{ errors.name }}</p>{% endif %}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="label" for="country">Country</label>
+          <input id="country" name="country" type="text" value="{{ place.country or '' }}"
+                 list="countryOptions" required maxlength="60"
+                 placeholder="e.g. Malaysia"
+                 {% if errors.country %}aria-invalid="true" aria-describedby="country-error"{% endif %}>
+          <datalist id="countryOptions">
+            {% for country in COUNTRIES %}<option value="{{ country }}"></option>{% endfor %}
+          </datalist>
+          {% if errors.country %}<p class="field-error" id="country-error">{{ errors.country }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="state">State / region</label>
+          <input id="state" name="state" type="text" value="{{ place.state or '' }}"
+                 list="stateOptions" required maxlength="80"
+                 placeholder="e.g. Kelantan"
+                 {% if errors.state %}aria-invalid="true" aria-describedby="state-error"{% endif %}>
+          <datalist id="stateOptions">
+            {% for state in MALAYSIA_STATES %}<option value="{{ state }}"></option>{% endfor %}
+            {% for nation in UK_NATIONS %}<option value="{{ nation }}"></option>{% endfor %}
+          </datalist>
+          {% if errors.state %}<p class="field-error" id="state-error">{{ errors.state }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="label" for="location">Address / area</label>
+          <input id="location" name="location" type="text" value="{{ place.location or '' }}" required
+                 placeholder="e.g. 12 Harbour Street, Bristol"
+                 {% if errors.location %}aria-invalid="true" aria-describedby="location-error"{% endif %}>
+          {% if errors.location %}<p class="field-error" id="location-error">{{ errors.location }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="category">Category</label>
+          <select id="category" name="category" required
+                  {% if errors.category %}aria-invalid="true" aria-describedby="category-error"{% endif %}>
+            <option value="">Choose a category…</option>
+            {% for category in CATEGORIES %}
+              <option value="{{ category }}" {% if place.category == category %}selected{% endif %}>
+                {{ CATEGORY_ICONS.get(category, '📍') }} {{ category }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if errors.category %}<p class="field-error" id="category-error">{{ errors.category }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="label" for="description">Description</label>
+        <textarea id="description" name="description" rows="5" maxlength="2000"
+                  placeholder="A short, factual description visitors will see on the place page."
+                  {% if errors.description %}aria-invalid="true" aria-describedby="description-error"{% endif %}>{{ place.description or '' }}</textarea>
+        {% if errors.description %}<p class="field-error" id="description-error">{{ errors.description }}</p>{% endif %}
+        <p class="hint">Keep it neutral — ratings and opinions belong in reviews.</p>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">
+          {% if mode == 'edit' %}Save changes{% else %}Add place{% endif %}
+        </button>
+        <a class="btn btn-ghost" href="/admin/places">Cancel</a>
+      </div>
+    </form>
+
+    <aside class="form-aside">
+      <div class="card tip-card">
+        <h2 class="card-title">Tips</h2>
+        <ul class="tick-list">
+          <li>Use the place's real name and a location people can search for.</li>
+          <li>Pick the closest category — it powers the filters.</li>
+          <li>Descriptions are for facts, not marketing copy.</li>
+        </ul>
+      </div>
+      {% if mode == 'edit' %}
+        <div class="card tip-card">
+          <h2 class="card-title">Danger zone</h2>
+          <p class="muted small">Deleting removes the place, all of its reviews and any reports attached to them.</p>
+          <form method="post" action="/admin/places/{{ place.id }}/delete"
+                data-confirm="Delete {{ place.name }} and all of its reviews? This cannot be undone.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn btn-danger btn-block" type="submit">Delete this place</button>
+          </form>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

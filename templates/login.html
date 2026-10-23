@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Log in — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="container auth-layout">
+    <div class="auth-aside">
+      <span class="eyebrow eyebrow-light">Welcome back</span>
+      <h1>Your next great place is one review away.</h1>
+      <p>Log in to write reviews, manage the ones you have written, and report content that should not be here.</p>
+      <ul class="tick-list tick-list-light">
+        <li>Rate places from 1 to 5 stars</li>
+        <li>Edit or delete your own reviews</li>
+        <li>Help keep reviews honest</li>
+      </ul>
+    </div>
+
+    <div class="auth-card card">
+      <h2 class="card-title">Log in to your account</h2>
+      <p class="card-sub">Enter the email address and password you registered with.</p>
+
+      {% if errors.form %}
+        <div class="form-alert" role="alert">{{ errors.form }}</div>
+      {% endif %}
+
+      <form method="post" action="/login" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ next_url }}">
+
+        <div class="form-group">
+          <label class="label" for="email">Email address</label>
+          <input id="email" name="email" type="email" value="{{ form.email or '' }}"
+                 autocomplete="email" required
+                 {% if errors.email %}aria-invalid="true" aria-describedby="email-error"{% endif %}>
+          {% if errors.email %}<p class="field-error" id="email-error">{{ errors.email }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required
+                 {% if errors.password %}aria-invalid="true" aria-describedby="password-error"{% endif %}>
+          {% if errors.password %}<p class="field-error" id="password-error">{{ errors.password }}</p>{% endif %}
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      </form>
+
+      <p class="auth-switch">New to {{ SITE_NAME }}? <a href="/register">Create an account</a></p>
+
+      <div class="demo-note">
+        <strong>Demo accounts</strong>
+        <p>Visitor: <code>demo@ratemyreview.com</code> / <code>Password123</code></p>
+        <p>Administrator: <code>admin@ratemyreview.com</code> / <code>Admin123!</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

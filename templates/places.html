@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}Explore places — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span><span>Explore Places</span>
+    </nav>
+    <h1>Explore places</h1>
+    <p class="page-lead">
+      Search {{ total_places }} place{{ '' if total_places == 1 else 's' }} by name, location or category,
+      then read the reviews before you decide.
+    </p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <form class="filter-card" action="/places" method="get" role="search">
+      <div class="filter-grid">
+        <div class="form-group">
+          <label class="label" for="q">Search</label>
+          <div class="input-with-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+            </svg>
+            <input id="q" type="search" name="q" value="{{ filters.q }}"
+                   placeholder="Name, location or keyword">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="location">Location</label>
+          <input id="location" type="text" name="location" value="{{ filters.location }}"
+                 placeholder="e.g. Bristol">
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="country">Country</label>
+          <select id="country" name="country" data-country-filter>
+            <option value="">All countries</option>
+            {% for country in countries %}
+              <option value="{{ country }}" {% if filters.country == country %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="state">State / region</label>
+          <select id="state" name="state" data-state-filter>
+            <option value="">All states</option>
+            {% for row in states %}
+              <option value="{{ row.state }}" data-country="{{ row.country }}"
+                      {% if filters.state == row.state %}selected{% endif %}>{{ row.state }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="category">Category</label>
+          <select id="category" name="category">
+            <option value="">All categories</option>
+            {% for category in CATEGORIES %}
+              <option value="{{ category }}" {% if filters.category == category %}selected{% endif %}>
+                {{ CATEGORY_ICONS.get(category, '📍') }} {{ category }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="sort">Sort by</label>
+          <select id="sort" name="sort">
+            <option value="top" {% if filters.sort == 'top' %}selected{% endif %}>Top rated</option>
+            <option value="reviews" {% if filters.sort == 'reviews' %}selected{% endif %}>Most reviewed</option>
+            <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Newest added</option>
+            <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-primary" type="submit">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+          </svg>
+          Search
+        </button>
+        {% if filters.q or filters.location or filters.country or filters.state or filters.category or filters.sort != 'top' %}
+          <a class="btn btn-ghost" href="/places">Clear filters</a>
+        {% endif %}
+      </div>
+    </form>
+
+    <div class="results-bar">
+      <p class="results-count">
+        {% if filters.q or filters.location or filters.country or filters.state or filters.category %}
+          <strong>{{ result_count }}</strong> result{{ '' if result_count == 1 else 's' }}
+          {% if filters.q %} for “<strong>{{ filters.q }}</strong>”{% endif %}
+          {% if filters.location %} in <strong>{{ filters.location }}</strong>{% endif %}
+          {% if filters.state or filters.country %}
+            · <strong>{{ filters.state }}{% if filters.state and filters.country %}, {% endif %}{{ filters.country }}</strong>
+          {% endif %}
+          {% if filters.category %} · <strong>{{ filters.category }}</strong>{% endif %}
+        {% else %}
+          Showing all <strong>{{ result_count }}</strong> place{{ '' if result_count == 1 else 's' }}
+        {% endif %}
+      </p>
+      <div class="view-toggle-note">Cards show the live average from the database.</div>
+    </div>
+
+    {% if places %}
+      <div class="card-grid">
+        {% for place in places %}
+          {% include "partials/place_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state empty-state-lg">
+        <span class="empty-icon" aria-hidden="true">🔍</span>
+        <h2>No places found</h2>
+        <p>
+          We could not find any places matching your search.
+          Try a different name, a wider location, another country, state or category.
+        </p>
+        <div class="empty-actions">
+          <a class="btn btn-primary" href="/places">Clear filters</a>
+          <a class="btn btn-outline" href="/write-review">Write a review</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

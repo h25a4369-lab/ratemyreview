@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}Reports — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-admin">
+  <div class="container">
+    <span class="eyebrow eyebrow-muted">Administrator area</span>
+    <h1>Reported reviews</h1>
+    <p class="page-lead">
+      A report is a request for a human decision — it never removes a review on its own.
+      Read the review, then resolve or dismiss the report.
+    </p>
+    {% include "admin/_nav.html" %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="filter-tabs" role="group" aria-label="Filter reports by status">
+      {% set tabs = [('open', 'Open'), ('resolved', 'Resolved'), ('dismissed', 'Dismissed'), ('all', 'All')] %}
+      {% for key, label in tabs %}
+        <a href="/admin/reports?status={{ key }}"
+           class="filter-tab {% if status == key %}is-active{% endif %}">
+          {{ label }}
+          {% if key != 'all' and counts.get(key) %}<span class="tab-count">{{ counts.get(key) }}</span>{% endif %}
+          {% if key == 'all' and total_reports %}<span class="tab-count">{{ total_reports }}</span>{% endif %}
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if reports %}
+      <div class="stack">
+        {% for report in reports %}
+          <article class="card report-card">
+            <header class="report-card-head">
+              <div>
+                <span class="badge badge-{{ 'warn' if report.status == 'open' else ('ok' if report.status == 'resolved' else 'soft') }}">
+                  {{ report.status|capitalize }}
+                </span>
+                <span class="muted small">Reported {{ report.created_at|datefmt }}</span>
+              </div>
+              <span class="muted small">Report #{{ report.id }}</span>
+            </header>
+
+            <div class="report-card-body">
+              <div class="report-review">
+                <div class="report-review-head">
+                  <span class="avatar avatar-sm" aria-hidden="true">{{ report.author_name[0]|upper }}</span>
+                  <div>
+                    <span class="review-author">{{ report.author_name|short_name }}</span>
+                    <span class="review-meta">
+                      on <a href="/places/{{ report.place_id }}#review-{{ report.review_id }}">{{ report.place_name }}</a>
+                    </span>
+                  </div>
+                  <span class="inline-rating">{{ stars(report.rating) }} {{ report.rating }}/5</span>
+                </div>
+                <p class="review-body">{{ report.comment }}</p>
+              </div>
+
+              <div class="report-meta">
+                <p><span class="label-inline">Reason given</span>{{ report.reason }}</p>
+                <p><span class="label-inline">Reported by</span>{{ report.reporter_name|short_name }}</p>
+              </div>
+            </div>
+
+            <footer class="report-card-foot">
+              <a class="btn btn-outline btn-sm" href="/places/{{ report.place_id }}#review-{{ report.review_id }}">Open review</a>
+              <div class="table-actions">
+                {% if report.status != 'resolved' %}
+                  <form method="post" action="/admin/reports/{{ report.id }}/status" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="status" value="resolved">
+                    <button class="btn btn-primary btn-sm" type="submit">Mark resolved</button>
+                  </form>
+                {% endif %}
+                {% if report.status != 'dismissed' %}
+                  <form method="post" action="/admin/reports/{{ report.id }}/status" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="status" value="dismissed">
+                    <button class="btn btn-ghost btn-sm" type="submit">Dismiss report</button>
+                  </form>
+                {% endif %}
+                <form method="post" action="/reviews/{{ report.review_id }}/delete" class="inline"
+                      data-confirm="Delete this review? This removes it from the place page.">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button class="btn btn-danger-ghost btn-sm" type="submit">Delete review</button>
+                </form>
+              </div>
+            </footer>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state empty-state-lg">
+        <span class="empty-icon" aria-hidden="true">🛡️</span>
+        <h2>Nothing to review here</h2>
+        <p>There are no reports with this status. Reported reviews will appear in this queue.</p>
+        <a class="btn btn-outline" href="/admin/reports?status=all">See all reports</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

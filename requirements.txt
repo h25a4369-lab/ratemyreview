@@ -1,0 +1,13 @@
+# Rate My Review — Python dependencies
+# Install with:  pip install -r requirements.txt
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+jinja2==3.1.5
+python-multipart==0.0.20
+itsdangerous==2.2.0
+python-dotenv==1.2.4
+
+# Testing
+pytest==8.3.4
+httpx==0.28.1

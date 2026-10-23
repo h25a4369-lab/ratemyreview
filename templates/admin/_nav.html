@@ -1,0 +1,15 @@
+{% set admin_tabs = [
+  ('/admin', 'Overview'),
+  ('/admin/places', 'Places'),
+  ('/admin/reviews', 'Reviews'),
+  ('/admin/reports', 'Reports'),
+  ('/admin/users', 'Users')
+] %}
+<nav class="admin-tabs" aria-label="Administration sections">
+  {% for href, label in admin_tabs %}
+    <a href="{{ href }}"
+       class="admin-tab {% if current_path == href or (href != '/admin' and current_path.startswith(href)) %}is-active{% endif %}">
+      {{ label }}
+    </a>
+  {% endfor %}
+</nav>

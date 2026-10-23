@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span><span>Privacy Policy</span>
+    </nav>
+    <h1>Privacy Policy</h1>
+    <p class="page-lead">Last updated {{ current_year }}. This is a demonstration site, but it follows the same privacy rules a real one should.</p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="card prose-card prose-narrow">
+      <h2>What we store</h2>
+      <ul class="tick-list">
+        <li><strong>Account details:</strong> your name, email address, a salted password hash and your role.</li>
+        <li><strong>Your content:</strong> the reviews you write, including the star rating, comment and dates.</li>
+        <li><strong>Reports:</strong> which review you reported, the reason you chose and the date.</li>
+      </ul>
+      <p>
+        We do not store your password. Only a one-way PBKDF2-SHA256 hash with a random salt is
+        saved, so the original password cannot be read back from the database.
+      </p>
+
+      <h2>What is shown publicly</h2>
+      <p>
+        Reviews show an abbreviated author name such as “Alice M.” together with the rating,
+        comment and date. Your email address is never displayed on the site, and only
+        administrators can see it in the management area.
+      </p>
+
+      <h2>Cookies</h2>
+      <p>
+        One cookie is used. It holds a signed session that remembers who is logged in and carries
+        a security token for forms. It contains no advertising identifiers and is not shared with
+        third parties. Logging out clears it.
+      </p>
+
+      <h2>How long we keep data</h2>
+      <p>
+        Reviews stay until you delete them or an administrator removes them for breaking the
+        guidelines. Deleting your account also deletes your reviews and reports.
+      </p>
+
+      <h2>Your choices</h2>
+      <ul class="tick-list">
+        <li>Edit or delete any review you wrote, at any time.</li>
+        <li>Ask an administrator to delete your account and its content.</li>
+        <li>Report content you believe is inappropriate.</li>
+      </ul>
+
+      <h2>Contact</h2>
+      <p>
+        Privacy questions can be sent to
+        <a href="mailto:privacy@ratemyreview.example">privacy@ratemyreview.example</a>.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

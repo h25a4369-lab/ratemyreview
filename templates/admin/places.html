@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}Manage places — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-admin">
+  <div class="container">
+    <span class="eyebrow eyebrow-muted">Administrator area</span>
+    <h1>Places</h1>
+    <p class="page-lead">{{ places|length }} place{{ '' if places|length == 1 else 's' }} on the site. Removing a place also removes its reviews.</p>
+    {% include "admin/_nav.html" %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="toolbar">
+      <p class="muted small">Sample places are labelled in their description; edit or delete them freely.</p>
+      <a class="btn btn-primary" href="/admin/places/new">Add a place</a>
+    </div>
+
+    {% if places %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Place</th>
+              <th scope="col">Category</th>
+              <th scope="col">Rating</th>
+              <th scope="col">Reviews</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for place in places %}
+              <tr>
+                <td>
+                  <a class="table-title" href="/places/{{ place.id }}">{{ place.name }}</a>
+                  <span class="table-sub">{{ place.location }}</span>
+                  <span class="table-sub">{{ place.state }}{% if place.state and place.country %}, {% endif %}{{ place.country }}</span>
+                </td>
+                <td><span class="pill pill-sm">{{ CATEGORY_ICONS.get(place.category, '📍') }} {{ place.category }}</span></td>
+                <td>
+                  {% if place.review_count %}
+                    <span class="inline-rating">{{ stars(place.avg_rating) }} {{ '%.1f'|format(place.avg_rating) }}</span>
+                  {% else %}
+                    <span class="muted small">No rating</span>
+                  {% endif %}
+                </td>
+                <td>{{ place.review_count }}</td>
+                <td class="actions-col">
+                  <div class="table-actions">
+                    <a class="btn btn-outline btn-sm" href="/admin/places/{{ place.id }}/edit">Edit</a>
+                    <form method="post" action="/admin/places/{{ place.id }}/delete" class="inline"
+                          data-confirm="Delete {{ place.name }} and all of its reviews? This cannot be undone.">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <button type="submit" class="btn btn-danger-ghost btn-sm">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">📍</span>
+        <h2>No places yet</h2>
+        <p>Add the first place so visitors have something to review.</p>
+        <a class="btn btn-primary" href="/admin/places/new">Add a place</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Contact — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span><span>Contact</span>
+    </nav>
+    <h1>Contact us</h1>
+    <p class="page-lead">Need help with your account, spotted a problem, or want a place added? Get in touch.</p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container contact-layout">
+    <div class="card prose-card">
+      <h2>Email</h2>
+      <p>
+        The quickest way to reach the team is by email at
+        <a href="mailto:hello@ratemyreview.example">hello@ratemyreview.example</a>.
+        We aim to reply within two working days.
+      </p>
+
+      <h2>Reporting a review</h2>
+      <p>
+        If a specific review breaks our guidelines, use the <strong>Report this review</strong>
+        link underneath it while logged in. Reports go straight to the administrator queue with
+        the review attached, which is much faster than emailing a screenshot.
+      </p>
+
+      <h2>Requesting a new place</h2>
+      <p>
+        Send the place name, its location and a one-line description. An administrator will add
+        it, after which it can be searched and reviewed like any other place.
+      </p>
+
+      <h2>Account problems</h2>
+      <p>
+        Include the email address you registered with and a short description of what happened.
+        Never send your password — nobody on the team will ever ask for it.
+      </p>
+    </div>
+
+    <aside class="prose-aside">
+      <div class="card tip-card">
+        <h2 class="card-title">Response times</h2>
+        <ul class="tick-list">
+          <li>Account help — 1–2 working days</li>
+          <li>Content reports — reviewed in order received</li>
+          <li>New place requests — usually within a week</li>
+        </ul>
+      </div>
+      <div class="card tip-card">
+        <h2 class="card-title">Before you write</h2>
+        <p class="muted small">
+          Our <a href="/terms">Terms of Service</a> and
+          <a href="/privacy">Privacy Policy</a> explain what we store and how reviews are moderated.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

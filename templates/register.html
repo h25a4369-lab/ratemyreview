@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Create an account — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="container auth-layout">
+    <div class="auth-aside auth-aside-purple">
+      <span class="eyebrow eyebrow-light">Join the community</span>
+      <h1>Share your experience with people who are deciding where to go.</h1>
+      <p>One free account lets you rate places, write reviews and keep everything you have shared in one place.</p>
+      <ul class="tick-list tick-list-light">
+        <li>Free to join — no payment details</li>
+        <li>Your email is never shown publicly</li>
+        <li>You control your own reviews</li>
+      </ul>
+    </div>
+
+    <div class="auth-card card">
+      <h2 class="card-title">Create your account</h2>
+      <p class="card-sub">It takes less than a minute.</p>
+
+      <form method="post" action="/register" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <div class="form-group">
+          <label class="label" for="name">Full name</label>
+          <input id="name" name="name" type="text" value="{{ form.name or '' }}"
+                 autocomplete="name" required maxlength="80"
+                 {% if errors.name %}aria-invalid="true" aria-describedby="name-error"{% endif %}>
+          {% if errors.name %}<p class="field-error" id="name-error">{{ errors.name }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="email">Email address</label>
+          <input id="email" name="email" type="email" value="{{ form.email or '' }}"
+                 autocomplete="email" required
+                 {% if errors.email %}aria-invalid="true" aria-describedby="email-error"{% endif %}>
+          <p class="hint">Used only to log in. It is never shown on your reviews.</p>
+          {% if errors.email %}<p class="field-error" id="email-error">{{ errors.email }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="label" for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="new-password"
+                   required minlength="8"
+                   {% if errors.password %}aria-invalid="true" aria-describedby="password-error"{% endif %}>
+            {% if errors.password %}<p class="field-error" id="password-error">{{ errors.password }}</p>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="label" for="confirm_password">Confirm password</label>
+            <input id="confirm_password" name="confirm_password" type="password"
+                   autocomplete="new-password" required minlength="8"
+                   {% if errors.confirm_password %}aria-invalid="true" aria-describedby="confirm-error"{% endif %}>
+            {% if errors.confirm_password %}<p class="field-error" id="confirm-error">{{ errors.confirm_password }}</p>{% endif %}
+          </div>
+        </div>
+
+        <p class="hint">At least 8 characters. Passwords are stored as salted hashes, never as plain text.</p>
+
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
+      <p class="hint hint-center">
+        By registering you agree to our <a href="/terms">Terms of Service</a>
+        and <a href="/privacy">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

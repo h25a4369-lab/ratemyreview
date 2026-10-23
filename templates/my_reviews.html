@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}My reviews — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span><span>My Reviews</span>
+    </nav>
+    <h1>My reviews</h1>
+    <p class="page-lead">Everything you have shared, in one place. You can edit or delete your own reviews at any time.</p>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    {% if reviews %}
+      <div class="stack">
+        {% for review in reviews %}
+          <article class="card review-manage">
+            <div class="review-manage-head">
+              <div>
+                <a class="review-manage-place" href="/places/{{ review.place_id }}#reviews">
+                  {{ CATEGORY_ICONS.get(review.place_category, '📍') }} {{ review.place_name }}
+                </a>
+                <p class="muted small">
+                  {{ review.place_location }}{% if review.place_state or review.place_country %}
+                  · {{ review.place_state }}{% if review.place_state and review.place_country %}, {% endif %}{{ review.place_country }}{% endif %}
+                  · {{ review.place_category }}
+                </p>
+              </div>
+              <div class="review-manage-rating">
+                {{ stars(review.rating) }}
+                <span class="review-score">{{ review.rating }}/5</span>
+              </div>
+            </div>
+
+            <p class="review-body">{{ review.comment }}</p>
+
+            <div class="review-manage-foot">
+              <span class="muted small">
+                Posted {{ review.created_at|datefmt }}
+                {% if review.updated_at %}· edited {{ review.updated_at|datefmt }}{% endif %}
+              </span>
+              <div class="review-actions">
+                <a class="btn btn-outline btn-sm" href="/reviews/{{ review.id }}/edit">Edit</a>
+                <form method="post" action="/reviews/{{ review.id }}/delete" class="inline"
+                      data-confirm="Delete your review of {{ review.place_name }}? This cannot be undone.">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="btn btn-danger-ghost btn-sm">Delete</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state empty-state-lg">
+        <span class="empty-icon" aria-hidden="true">✍️</span>
+        <h2>You have not written a review yet</h2>
+        <p>Once you review a place it will appear here, ready to edit or delete.</p>
+        <div class="empty-actions">
+          <a class="btn btn-primary" href="/places">Find a place to review</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

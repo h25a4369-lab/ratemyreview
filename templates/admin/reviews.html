@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}Moderate reviews — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-admin">
+  <div class="container">
+    <span class="eyebrow eyebrow-muted">Administrator area</span>
+    <h1>Reviews</h1>
+    <p class="page-lead">Every review on the site. Ones with reports are listed first.</p>
+    {% include "admin/_nav.html" %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    {% if reviews %}
+      <div class="table-wrap">
+        <table class="table table-reviews">
+          <thead>
+            <tr>
+              <th scope="col">Place</th>
+              <th scope="col">Review</th>
+              <th scope="col">Author</th>
+              <th scope="col">Posted</th>
+              <th scope="col" class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for review in reviews %}
+              <tr class="{% if review.report_count %}has-reports{% endif %}">
+                <td>
+                  <a class="table-title" href="/places/{{ review.place_id }}#review-{{ review.id }}">{{ review.place_name }}</a>
+                  <span class="table-sub">{{ stars(review.rating) }} {{ review.rating }}/5</span>
+                </td>
+                <td class="review-cell">
+                  <p class="table-comment">{{ review.comment }}</p>
+                  {% if review.report_count %}
+                    <span class="badge badge-warn">{{ review.report_count }} report{{ '' if review.report_count == 1 else 's' }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="table-title">{{ review.author_name|short_name }}</span>
+                  <span class="table-sub">{{ review.author_name }}</span>
+                </td>
+                <td class="muted small">{{ review.created_at|datefmt }}</td>
+                <td class="actions-col">
+                  <div class="table-actions">
+                    <a class="btn btn-outline btn-sm" href="/places/{{ review.place_id }}#review-{{ review.id }}">View</a>
+                    <form method="post" action="/reviews/{{ review.id }}/delete" class="inline"
+                          data-confirm="Delete this review by {{ review.author_name }}? This cannot be undone.">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <button class="btn btn-danger-ghost btn-sm" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">💬</span>
+        <h2>No reviews yet</h2>
+        <p>Reviews appear here as soon as registered users submit them.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

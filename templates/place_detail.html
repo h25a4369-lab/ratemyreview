@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% from "partials/stars.html" import stars %}
+
+{% block title %}{{ place.name }} — {{ SITE_NAME }}{% endblock %}
+{% block description %}Read {{ place.review_count }} review{{ '' if place.review_count == 1 else 's' }} of {{ place.name }} in {{ place.location }}.{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-place">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a><span aria-hidden="true">/</span>
+      <a href="/places">Explore Places</a><span aria-hidden="true">/</span>
+      <span>{{ place.name }}</span>
+    </nav>
+
+    <div class="place-head">
+      <span class="cat-icon cat-icon-lg" aria-hidden="true">{{ CATEGORY_ICONS.get(place.category, '📍') }}</span>
+      <div class="place-head-text">
+        <div class="place-head-tags">
+          <span class="pill">{{ place.category }}</span>
+          {% if place.description.startswith('Sample place') %}
+            <span class="badge badge-soft">Sample data</span>
+          {% endif %}
+        </div>
+        <h1>{{ place.name }}</h1>
+        <p class="place-head-loc">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>
+          </svg>
+          {{ place.location }}
+        </p>
+        {% if place.state or place.country %}
+          <p class="place-head-region">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18a15 15 0 010-18z"/>
+            </svg>
+            {{ place.state }}{% if place.state and place.country %}, {% endif %}{{ place.country }}
+          </p>
+        {% endif %}
+      </div>
+      <div class="place-head-rating">
+        {% if place.review_count %}
+          <span class="place-head-score">{{ '%.1f'|format(place.avg_rating) }}</span>
+          <div>
+            {{ stars(place.avg_rating) }}
+            <p class="muted small">{{ place.review_count }} review{{ '' if place.review_count == 1 else 's' }}</p>
+          </div>
+        {% else %}
+          <span class="badge badge-soft">No reviews yet</span>
+        {% endif %}
+      </div>
+
+      <div class="place-head-cta">
+        {% if my_review %}
+          <a class="btn btn-outline" href="/reviews/{{ my_review.id }}/edit">Edit your review</a>
+        {% else %}
+          <a class="btn btn-primary" href="/write-review?place_id={{ place.id }}">Write a review</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container detail-layout">
+    <div class="detail-main">
+      <article class="card">
+        <h2 class="card-title">About this place</h2>
+        <p class="prose">{{ place.description }}</p>
+        <dl class="meta-list">
+          <div><dt>Category</dt><dd>{{ place.category }}</dd></div>
+          <div><dt>State / region</dt><dd>{{ place.state or "—" }}</dd></div>
+          <div><dt>Country</dt><dd>{{ place.country or "—" }}</dd></div>
+          <div><dt>Address</dt><dd>{{ place.location }}</dd></div>
+          <div><dt>Added</dt><dd>{{ place.created_at|datefmt }}</dd></div>
+        </dl>
+      </article>
+
+      <section class="card" id="reviews" aria-labelledby="reviews-title">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title" id="reviews-title">
+              Reviews
+              <span class="count-badge">{{ place.review_count }}</span>
+            </h2>
+            <p class="card-sub">Comments are written by registered visitors.</p>
+          </div>
+          {% if reviews|length > 1 %}
+            <div class="sort-tabs" role="group" aria-label="Sort reviews">
+              <a href="/places/{{ place.id }}?sort=newest#reviews"
+                 class="sort-tab {% if sort == 'newest' %}is-active{% endif %}">Newest</a>
+              <a href="/places/{{ place.id }}?sort=highest#reviews"
+                 class="sort-tab {% if sort == 'highest' %}is-active{% endif %}">Highest</a>
+              <a href="/places/{{ place.id }}?sort=lowest#reviews"
+                 class="sort-tab {% if sort == 'lowest' %}is-active{% endif %}">Lowest</a>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if reviews %}
+          <div class="review-list">
+            {% for review in reviews %}
+              <article class="review" id="review-{{ review.id }}">
+                <header class="review-head">
+                  <span class="avatar" aria-hidden="true">{{ review.author_name[0]|upper }}</span>
+                  <div class="review-who">
+                    <span class="review-author">
+                      {{ review.author_name|short_name }}
+                      {% if review.is_mine %}<span class="badge badge-you">You</span>{% endif %}
+                    </span>
+                    <span class="review-meta">
+                      {{ review.created_at|datefmt }}
+                      {% if review.updated_at %}· edited {{ review.updated_at|datefmt }}{% endif %}
+                    </span>
+                  </div>
+                  <div class="review-rating">
+                    {{ stars(review.rating) }}
+                    <span class="review-score">{{ review.rating }}/5</span>
+                  </div>
+                </header>
+
+                <p class="review-body">{{ review.comment }}</p>
+
+                <footer class="review-actions">
+                  {% if review.is_mine %}
+                    <a class="link-btn" href="/reviews/{{ review.id }}/edit">Edit review</a>
+                    <form method="post" action="/reviews/{{ review.id }}/delete" class="inline"
+                          data-confirm="Delete your review of {{ place.name }}? This cannot be undone.">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <button type="submit" class="link-btn danger">Delete</button>
+                    </form>
+                  {% elif user %}
+                    {% if review.reported_by_me %}
+                      <span class="badge badge-warn">Reported — awaiting review</span>
+                    {% else %}
+                      <details class="report-details">
+                        <summary class="link-btn">Report this review</summary>
+                        <form method="post" action="/reviews/{{ review.id }}/report" class="report-form">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                          <label class="label" for="reason-{{ review.id }}">Why are you reporting this review?</label>
+                          <select id="reason-{{ review.id }}" name="reason" required>
+                            <option value="">Choose a reason…</option>
+                            {% for value, label in REPORT_REASONS.items() %}
+                              <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                          </select>
+                          <p class="hint">
+                            Reports are checked by an administrator. The review stays visible meanwhile.
+                          </p>
+                          <button type="submit" class="btn btn-danger btn-sm">Send report</button>
+                        </form>
+                      </details>
+                    {% endif %}
+                  {% else %}
+                    <a class="link-btn" href="/login?next=/places/{{ place.id }}">Log in to report this review</a>
+                  {% endif %}
+                </footer>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">💬</span>
+            <h3>No reviews yet.</h3>
+            <p>This place has not been reviewed. Be the first to share your experience.</p>
+            {% if user %}
+              <a class="btn btn-primary" href="/write-review?place_id={{ place.id }}">Write the first review</a>
+            {% else %}
+              <a class="btn btn-primary" href="/login?next=/write-review?place_id={{ place.id }}">Log in to review</a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <aside class="detail-aside">
+      <div class="card rating-card">
+        <h2 class="card-title">Rating summary</h2>
+        {% if place.review_count %}
+          <div class="rating-hero">
+            <span class="rating-big">{{ '%.1f'|format(place.avg_rating) }}</span>
+            <div>
+              {{ stars(place.avg_rating, 'stars-lg') }}
+              <p class="muted small">Based on {{ place.review_count }} review{{ '' if place.review_count == 1 else 's' }}</p>
+            </div>
+          </div>
+
+          <ul class="rating-bars">
+            {% for row in distribution %}
+              <li>
+                <span class="rating-bar-label">{{ row.star }} ★</span>
+                <span class="rating-bar-track">
+                  <span class="rating-bar-fill" style="width: {{ row.pct }}%"></span>
+                </span>
+                <span class="rating-bar-count">{{ row.count }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">No ratings yet. The average appears as soon as someone reviews this place.</p>
+        {% endif %}
+
+        <div class="rating-cta">
+          {% if not user %}
+            <a class="btn btn-primary btn-block" href="/login?next=/write-review?place_id={{ place.id }}">Log in to write a review</a>
+            <p class="hint">New here? <a href="/register">Create a free account</a>.</p>
+          {% elif my_review %}
+            <a class="btn btn-outline btn-block" href="/reviews/{{ my_review.id }}/edit">Edit your review</a>
+            <p class="hint">You rated this place {{ my_review.rating }}/5.</p>
+          {% else %}
+            <a class="btn btn-primary btn-block" href="/write-review?place_id={{ place.id }}">Write a review</a>
+            <p class="hint">Share a rating and a few words about your visit.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card tip-card">
+        <h2 class="card-title">Review guidelines</h2>
+        <ul class="tick-list">
+          <li>Describe your own experience.</li>
+          <li>Keep it respectful and specific.</li>
+          <li>No advertising or personal details.</li>
+          <li>Report anything that breaks these rules.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% from "partials/stars.html" import stars %}
+<article class="place-card">
+  <a class="place-card-link" href="/places/{{ place.id }}">
+    <div class="place-card-top">
+      <span class="cat-icon" aria-hidden="true">{{ CATEGORY_ICONS.get(place.category, '📍') }}</span>
+      <span class="pill">{{ place.category }}</span>
+    </div>
+    <h3 class="place-card-title">{{ place.name }}</h3>
+    <p class="place-card-loc">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>
+      </svg>
+      {{ place.location }}
+    </p>
+    {% if place.state or place.country %}
+      <p class="place-card-region">{{ place.state }}{% if place.state and place.country %}, {% endif %}{{ place.country }}</p>
+    {% endif %}
+    <div class="place-card-rating">
+      {% if place.review_count %}
+        {{ stars(place.avg_rating) }}
+        <strong>{{ '%.1f'|format(place.avg_rating) }}</strong>
+        <span class="muted">({{ place.review_count }} review{{ '' if place.review_count == 1 else 's' }})</span>
+      {% else %}
+        <span class="badge badge-soft">No reviews yet</span>
+      {% endif %}
+    </div>
+    <p class="place-card-desc">{{ place.description }}</p>
+  </a>
+</article>
